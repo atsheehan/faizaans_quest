@@ -12,7 +12,8 @@ let Maze = {
     let maze = {
       rows: 4,
       columns: 4,
-      grid: [1, 1, 1, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 1, 1, 1]
+      grid: [1, 1, 1, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 1, 1, 1],
+      player: { x: 1, y: 1 }
     };
 
     this.renderMaze(ctx, maze);
@@ -34,6 +35,12 @@ let Maze = {
         ctx.fillRect(x, y, cellWidth, cellWidth);
       }
     }
+
+    let playerX = maze.player.x * cellWidth;
+    let playerY = maze.player.y * cellWidth;
+
+    ctx.fillStyle = "red";
+    ctx.fillRect(playerX, playerY, cellWidth, cellWidth);
   }
 };
 
