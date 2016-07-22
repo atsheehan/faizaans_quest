@@ -2,13 +2,6 @@ let Maze = {
   init(canvas) {
     if (!canvas) { return; }
 
-    let ctx = canvas.getContext("2d");
-
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    ctx.fillStyle = "black";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
     let maze = {
       rows: 4,
       columns: 4,
@@ -16,10 +9,43 @@ let Maze = {
       player: { x: 1, y: 1 }
     };
 
-    this.renderMaze(ctx, maze);
+    let ctx = canvas.getContext("2d");
+    let screen = { context: ctx, width: canvas.width, height: canvas.height };
+
+    this.renderMaze(maze, screen);
+
+    window.onkeydown = e => {
+      switch (e.key) {
+      case "ArrowLeft":
+        maze.player.x--;
+        this.renderMaze(maze, screen);
+        break;
+
+      case "ArrowRight":
+        maze.player.x++;
+        this.renderMaze(maze, screen);
+        break;
+
+      case "ArrowUp":
+        maze.player.y--;
+        this.renderMaze(maze, screen);
+        break;
+
+      case "ArrowDown":
+        maze.player.y++;
+        this.renderMaze(maze, screen);
+        break;
+
+      default: break;
+      }
+    };
   },
 
-  renderMaze(ctx, maze) {
+  renderMaze(maze, screen) {
+    let ctx = screen.context;
+
+    ctx.clearRect(0, 0, screen.width, screen.height);
+
     let cellWidth = 24;
 
     for (let row = 0; row < maze.rows; row++) {
