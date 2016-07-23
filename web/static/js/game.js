@@ -3,10 +3,13 @@ let Game = {
     if (!canvas) { return; }
 
     this.events = [];
+    this.messages = [];
 
     socket.connect();
     let channel = socket.channel("maze", {});
     let module = this;
+
+    channel.on("update", world => this.messages.push(world));
 
     channel.join()
       .receive("error", resp => console.log("Unable to connect to server", resp))
@@ -20,7 +23,10 @@ let Game = {
   },
 
   loop(world, renderer, time) {
-    let newWorld = this.tick(this.handleEvents(world, time), time);
+    let newWorld = this.tick(
+      this.handleMessages(
+        this.handleEvents(world, time), time), time);
+
     this.render(newWorld, renderer);
     window.requestAnimationFrame(time => this.loop(newWorld, renderer, time));
   },
@@ -41,6 +47,16 @@ let Game = {
 
     default:
       break;
+    }
+  },
+
+  handleMessages(world, time) {
+    let message = this.messages.pop();
+
+    if (message === undefined) {
+      return world;
+    } else {
+      return message;
     }
   },
 
