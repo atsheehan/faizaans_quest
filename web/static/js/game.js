@@ -64,12 +64,21 @@ let Game = {
   },
 
   move(world, newPosition) {
-    return {
-      rows: world.rows,
-      columns: world.columns,
-      grid: world.grid,
-      player: newPosition
-    };
+    if (this.canMoveTo(world, newPosition)) {
+      return {
+        rows: world.rows,
+        columns: world.columns,
+        grid: world.grid,
+        player: newPosition
+      };
+    } else {
+      return world;
+    }
+  },
+
+  canMoveTo(world, position) {
+    let index = this.index(world, position);
+    return world.grid[index] == 0;
   },
 
   tick(world, time) {
@@ -104,6 +113,10 @@ let Game = {
 
     ctx.fillStyle = "red";
     ctx.fillRect(playerX + xOffset, playerY + yOffset, CELL_WIDTH, CELL_WIDTH);
+  },
+
+  index(world, position) {
+    return (position.x * world.columns) + position.y;
   }
 };
 
