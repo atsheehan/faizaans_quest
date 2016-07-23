@@ -77,10 +77,16 @@ let Game = {
   },
 
   render(world, renderer) {
+    const CELL_WIDTH = 24;
+
     let ctx = renderer.context;
     ctx.clearRect(0, 0, renderer.width, renderer.height);
 
-    const CELL_WIDTH = 24;
+    let playerX = world.player.x * CELL_WIDTH;
+    let playerY = world.player.y * CELL_WIDTH;
+
+    let xOffset = (renderer.width / 2) - playerX;
+    let yOffset = (renderer.height / 2) - playerY;
 
     for (let row = 0; row < world.rows; row++) {
       for (let col = 0; col < world.columns; col++) {
@@ -92,15 +98,12 @@ let Game = {
         let y = row * CELL_WIDTH;
 
         ctx.fillStyle = color;
-        ctx.fillRect(x, y, CELL_WIDTH, CELL_WIDTH);
+        ctx.fillRect(x + xOffset, y + yOffset, CELL_WIDTH, CELL_WIDTH);
       }
     }
 
-    let playerX = world.player.x * CELL_WIDTH;
-    let playerY = world.player.y * CELL_WIDTH;
-
     ctx.fillStyle = "red";
-    ctx.fillRect(playerX, playerY, CELL_WIDTH, CELL_WIDTH);
+    ctx.fillRect(playerX + xOffset, playerY + yOffset, CELL_WIDTH, CELL_WIDTH);
   }
 };
 
