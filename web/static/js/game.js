@@ -2,6 +2,9 @@ let Game = {
   init(canvas, world) {
     if (!canvas) { return; }
 
+    this.events = [];
+
+    window.addEventListener("keydown", e => this.addEvent(e));
     let renderer = this.prepareRenderer(canvas);
     window.requestAnimationFrame(time => this.loop(world, renderer, time));
   },
@@ -17,8 +20,56 @@ let Game = {
     return { context: ctx, width: canvas.width, height: canvas.height };
   },
 
-  handleEvents(world, _time) {
-    return world;
+  addEvent(event) {
+    switch (event.key) {
+    case "ArrowLeft":
+    case "ArrowRight":
+    case "ArrowUp":
+    case "ArrowDown":
+      this.events.push(event);
+      break;
+
+    default:
+      break;
+    }
+  },
+
+  handleEvents(world, time) {
+    let event = this.events.pop();
+
+    if (event === undefined) {
+      return world;
+    } else {
+      return this.handleEvents(this.handleEvent(world, event, time));
+    }
+  },
+
+  handleEvent(world, event, time) {
+    switch (event.key) {
+    case "ArrowLeft":
+      return this.move(world, { x: world.player.x - 1, y: world.player.y });
+
+    case "ArrowRight":
+      return this.move(world, { x: world.player.x + 1, y: world.player.y });
+
+    case "ArrowUp":
+      return this.move(world, { x: world.player.x, y: world.player.y - 1 });
+
+    case "ArrowDown":
+      return this.move(world, { x: world.player.x, y: world.player.y + 1 });
+
+    default:
+      return world;
+    }
+  },
+
+  move(world, newPosition) {
+    return {
+      rows: world.rows,
+      columns: world.columns,
+      grid: world.grid,
+      player: newPosition
+    };
   },
 
   tick(world, time) {
