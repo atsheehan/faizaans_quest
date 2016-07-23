@@ -1,5 +1,5 @@
 let Game = {
-  init(canvas, socket, world) {
+  init(canvas, socket) {
     if (!canvas) { return; }
 
     this.events = [];
@@ -10,10 +10,10 @@ let Game = {
 
     channel.join()
       .receive("error", resp => console.log("Unable to connect to server", resp))
-      .receive("ok", resp => module.setup(resp, canvas, world));
+      .receive("ok", world => module.setup(world, canvas));
   },
 
-  setup(serverData, canvas, world) {
+  setup(world, canvas) {
     window.addEventListener("keydown", e => this.addEvent(e));
     let renderer = this.prepareRenderer(canvas);
     window.requestAnimationFrame(time => this.loop(world, renderer, time));

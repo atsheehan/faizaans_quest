@@ -21,19 +21,5 @@ import "phoenix_html";
 import socket from "./socket";
 import Game from "./game";
 
-let world = {
-  rows: 4,
-  columns: 4,
-  grid: [
-    1, 1, 1, 1,
-    1, 0, 0, 1,
-    1, 0, 0, 1,
-    1, 1, 1, 1
-  ],
-  player: {
-    x: 1, y: 1
-  }
-};
-
 let canvas = document.getElementById("maze-canvas");
-Game.init(canvas, socket, world);
+Game.init(canvas, socket);
