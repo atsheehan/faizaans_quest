@@ -2,7 +2,7 @@ defmodule Hookah.UserSocket do
   use Phoenix.Socket
 
   ## Channels
-  # channel "room:*", Hookah.RoomChannel
+  channel "maze", Hookah.MazeChannel
 
   ## Transports
   transport :websocket, Phoenix.Transports.WebSocket

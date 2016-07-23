@@ -18,7 +18,7 @@ import "phoenix_html";
 // Local files can be imported directly using relative
 // paths "./socket" or full ones "web/static/js/socket".
 
-// import socket from "./socket"
+import socket from "./socket";
 import Game from "./game";
 
 let world = {
@@ -35,4 +35,5 @@ let world = {
   }
 };
 
-Game.init(document.getElementById("maze-canvas"), world);
+let canvas = document.getElementById("maze-canvas");
+Game.init(canvas, socket, world);

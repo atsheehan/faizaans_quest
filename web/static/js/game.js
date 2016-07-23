@@ -1,9 +1,19 @@
 let Game = {
-  init(canvas, world) {
+  init(canvas, socket, world) {
     if (!canvas) { return; }
 
     this.events = [];
 
+    socket.connect();
+    let channel = socket.channel("maze", {});
+    let module = this;
+
+    channel.join()
+      .receive("error", resp => console.log("Unable to connect to server", resp))
+      .receive("ok", resp => module.setup(resp, canvas, world));
+  },
+
+  setup(serverData, canvas, world) {
     window.addEventListener("keydown", e => this.addEvent(e));
     let renderer = this.prepareRenderer(canvas);
     window.requestAnimationFrame(time => this.loop(world, renderer, time));
