@@ -19,6 +19,20 @@ import "phoenix_html";
 // paths "./socket" or full ones "web/static/js/socket".
 
 // import socket from "./socket"
-import Maze from "./maze";
+import Game from "./game";
 
-Maze.init(document.getElementById("maze-canvas"));
+let world = {
+  rows: 4,
+  columns: 4,
+  grid: [
+    1, 1, 1, 1,
+    1, 0, 0, 1,
+    1, 0, 0, 1,
+    1, 1, 1, 1
+  ],
+  player: {
+    x: 1, y: 1
+  }
+};
+
+Game.init(document.getElementById("maze-canvas"), world);
