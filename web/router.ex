@@ -18,6 +18,9 @@ defmodule Hookah.Router do
 
     get "/", PageController, :index
     get "/maze", MazeController, :index
+    get "/auth/sign_in", SessionController, :sign_in
+    get "/auth/sign_out", SessionController, :sign_out
+    get "/auth/github/callback", SessionController, :callback
   end
 
   # Other scopes may use custom stacks.

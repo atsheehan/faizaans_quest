@@ -14,6 +14,14 @@
       <p class="alert alert-info" role="alert"><%= get_flash(@conn, :info) %></p>
       <p class="alert alert-danger" role="alert"><%= get_flash(@conn, :error) %></p>
 
+      <nav>
+        <%= if user_signed_in?(@conn) do %>
+          Signed in as <%= current_username(@conn) %> (<%= link("Sign out", to: "/auth/sign_out") %>).
+        <% else %>
+          <%= link("Sign in", to: "/auth/sign_in") %>
+        <% end %>
+      </nav>
+
       <main role="main">
         <%= render @view_module, @view_template, assigns %>
       </main>
