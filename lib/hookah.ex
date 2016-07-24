@@ -13,7 +13,7 @@ defmodule Hookah do
       # Start the endpoint when the application starts
       supervisor(Hookah.Endpoint, []),
       # Start your own worker by calling: Hookah.Worker.start_link(arg1, arg2, arg3)
-      # worker(Hookah.Worker, [arg1, arg2, arg3]),
+      worker(Hookah.Maze, [Hookah.Maze])
     ]
 
     # See http://elixir-lang.org/docs/stable/elixir/Supervisor.html

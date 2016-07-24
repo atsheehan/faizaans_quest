@@ -3,15 +3,12 @@ defmodule Hookah.MazeChannel do
 
   def join("maze", _params, socket) do
     :timer.send_interval(5_000, :sync_world)
-    {:ok, pid} = Hookah.Maze.start_link
-    initial_world = Hookah.Maze.get_world(pid)
-    socket = assign(socket, :maze_pid, pid)
+    initial_world = Hookah.Maze.get_world
     {:ok, initial_world, socket}
   end
 
   def handle_info(:sync_world, socket) do
-    pid = socket.assigns[:maze_pid]
-    world = Hookah.Maze.get_world(pid)
+    world = Hookah.Maze.get_world
     broadcast!(socket, "update", world)
     {:noreply, socket}
   end
@@ -22,8 +19,7 @@ defmodule Hookah.MazeChannel do
   def handle_in("move_down", params, socket), do: move(:down, params, socket)
 
   defp move(direction, _params, socket) do
-    pid = socket.assigns[:maze_pid]
-    world = Hookah.Maze.move(pid, direction)
+    world = Hookah.Maze.move(direction)
     broadcast!(socket, "update", world)
     {:noreply, socket}
   end

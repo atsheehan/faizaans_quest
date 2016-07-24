@@ -1,12 +1,14 @@
 defmodule Hookah.Maze do
   use GenServer
 
-  def get_world(pid), do: GenServer.call(pid, :get_world)
+  def get_world(pid \\ Hookah.Maze), do: GenServer.call(pid, :get_world)
 
-  def move(pid, direction), do: GenServer.call(pid, {:move, direction})
+  def move(pid \\ Hookah.Maze, direction) do
+    GenServer.call(pid, {:move, direction})
+  end
 
-  def start_link do
-    GenServer.start_link(__MODULE__, initial_world)
+  def start_link(name \\ nil) do
+    GenServer.start_link(__MODULE__, initial_world, name: name)
   end
 
   def init(initial_world) do
