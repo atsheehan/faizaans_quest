@@ -6,12 +6,11 @@ let Game = {
     this.messages = [];
 
     socket.connect();
-    let channel = socket.channel("maze", {});
+    this.channel = socket.channel("maze", {});
     let module = this;
 
-    channel.on("update", world => this.messages.push(world));
-
-    channel.join()
+    this.channel.on("update", world => this.messages.push(world));
+    this.channel.join()
       .receive("error", resp => console.log("Unable to connect to server", resp))
       .receive("ok", world => module.setup(world, canvas));
   },
@@ -73,15 +72,19 @@ let Game = {
   handleEvent(world, event, time) {
     switch (event.key) {
     case "ArrowLeft":
+      this.channel.push("move_left");
       return this.move(world, { x: world.player.x - 1, y: world.player.y });
 
     case "ArrowRight":
+      this.channel.push("move_right");
       return this.move(world, { x: world.player.x + 1, y: world.player.y });
 
     case "ArrowUp":
+      this.channel.push("move_up");
       return this.move(world, { x: world.player.x, y: world.player.y - 1 });
 
     case "ArrowDown":
+      this.channel.push("move_down");
       return this.move(world, { x: world.player.x, y: world.player.y + 1 });
 
     default:

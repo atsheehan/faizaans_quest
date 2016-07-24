@@ -15,4 +15,16 @@ defmodule Hookah.MazeChannel do
     broadcast!(socket, "update", world)
     {:noreply, socket}
   end
+
+  def handle_in("move_left", params, socket), do: move(:left, params, socket)
+  def handle_in("move_right", params, socket), do: move(:right, params, socket)
+  def handle_in("move_up", params, socket), do: move(:up, params, socket)
+  def handle_in("move_down", params, socket), do: move(:down, params, socket)
+
+  defp move(direction, _params, socket) do
+    pid = socket.assigns[:maze_pid]
+    world = Hookah.Maze.move(pid, direction)
+    broadcast!(socket, "update", world)
+    {:noreply, socket}
+  end
 end
