@@ -39,11 +39,29 @@ defmodule Hookah.Maze do
   end
 
   defp do_move(world, direction) do
-    case direction do
-      :left -> %{world|player: %{world.player|x: world.player.x - 1}}
-      :right -> %{world|player: %{world.player|x: world.player.x + 1}}
-      :up -> %{world|player: %{world.player|y: world.player.y - 1}}
-      :down -> %{world|player: %{world.player|y: world.player.y + 1}}
+    new_position = move_player(world.player, direction)
+
+    if passable?(world, new_position) do
+      %{world|player: new_position}
+    else
+      world
     end
+  end
+
+  defp move_player(position, direction) do
+    case direction do
+      :left -> %{x: position.x - 1, y: position.y}
+      :right -> %{x: position.x + 1, y: position.y}
+      :up -> %{x: position.x, y: position.y - 1}
+      :down -> %{x: position.x, y: position.y + 1}
+    end
+  end
+
+  def passable?(world = %{grid: grid}, position) do
+    Enum.at(grid, index(world, position)) == 0
+  end
+
+  def index(%{columns: columns}, %{x: x, y: y}) do
+    (y * columns) + x
   end
 end
