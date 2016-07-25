@@ -73,41 +73,23 @@ let Game = {
     switch (event.key) {
     case "ArrowLeft":
       this.channel.push("move_left");
-      return this.move(world, { x: world.player.x - 1, y: world.player.y });
+      return world;
 
     case "ArrowRight":
       this.channel.push("move_right");
-      return this.move(world, { x: world.player.x + 1, y: world.player.y });
+      return world;
 
     case "ArrowUp":
       this.channel.push("move_up");
-      return this.move(world, { x: world.player.x, y: world.player.y - 1 });
+      return world;
 
     case "ArrowDown":
       this.channel.push("move_down");
-      return this.move(world, { x: world.player.x, y: world.player.y + 1 });
+      return world;
 
     default:
       return world;
     }
-  },
-
-  move(world, newPosition) {
-    if (this.canMoveTo(world, newPosition)) {
-      return {
-        rows: world.rows,
-        columns: world.columns,
-        grid: world.grid,
-        player: newPosition
-      };
-    } else {
-      return world;
-    }
-  },
-
-  canMoveTo(world, position) {
-    let index = this.index(world, position);
-    return world.grid[index] == 0;
   },
 
   tick(world, time) {
@@ -142,10 +124,6 @@ let Game = {
 
     ctx.fillStyle = "red";
     ctx.fillRect(playerX + xOffset, playerY + yOffset, CELL_WIDTH, CELL_WIDTH);
-  },
-
-  index(world, position) {
-    return (position.x * world.columns) + position.y;
   }
 };
 
