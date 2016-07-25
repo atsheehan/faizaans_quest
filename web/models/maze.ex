@@ -3,8 +3,12 @@ defmodule Hookah.Maze do
 
   def get_world(pid \\ Hookah.Maze), do: GenServer.call(pid, :get_world)
 
-  def move(pid \\ Hookah.Maze, direction) do
-    GenServer.call(pid, {:move, direction})
+  def join(pid \\ Hookah.Maze, player_id) do
+    GenServer.call(pid, {:join, player_id})
+  end
+
+  def move(pid \\ Hookah.Maze, player_id, direction) do
+    GenServer.call(pid, {:move, player_id, direction})
   end
 
   def start_link(name \\ nil) do
@@ -15,10 +19,16 @@ defmodule Hookah.Maze do
     {:ok, initial_world}
   end
 
-  def handle_call({:move, direction}, _from, world) do
-    new_world = do_move(world, direction)
+  def handle_call({:move, player_id, direction}, _from, world) do
+    new_world = do_move(world, player_id, direction)
     {:reply, new_world, new_world}
   end
+
+  def handle_call({:join, player_id}, _from, world) do
+    new_world = add_player(world, player_id)
+    {:reply, new_world, new_world}
+  end
+
 
   def handle_call(:get_world, _from, world) do
     {:reply, world, world}
@@ -34,21 +44,26 @@ defmodule Hookah.Maze do
         1, 0, 0, 1,
         1, 1, 1, 1
       ],
-      player: %{x: 1, y: 1}
+      players: []
     };
   end
 
-  defp do_move(world, direction) do
-    new_position = move_player(world.player, direction)
+  defp do_move(world, player_id, direction) do
+    player = find_player(world, player_id)
+    new_position = shift_position(player.position, direction)
 
     if passable?(world, new_position) do
-      %{world|player: new_position}
+      update_player(world, %{player|position: new_position})
     else
       world
     end
   end
 
-  defp move_player(position, direction) do
+  defp find_player(%{players: players}, player_id) do
+    Enum.find(players, fn player -> player.id == player_id end)
+  end
+
+  defp shift_position(position, direction) do
     case direction do
       :left -> %{x: position.x - 1, y: position.y}
       :right -> %{x: position.x + 1, y: position.y}
@@ -57,11 +72,23 @@ defmodule Hookah.Maze do
     end
   end
 
-  def passable?(world = %{grid: grid}, position) do
+  defp update_player(world = %{players: players}, new_player = %{id: player_id}) do
+    index = Enum.find_index(players, fn player -> player.id == player_id end)
+    updated_players = List.replace_at(players, index, new_player)
+    %{world|players: updated_players}
+  end
+
+  defp passable?(world = %{grid: grid}, position) do
     Enum.at(grid, index(world, position)) == 0
   end
 
-  def index(%{columns: columns}, %{x: x, y: y}) do
+  defp index(%{columns: columns}, %{x: x, y: y}) do
     (y * columns) + x
+  end
+
+  defp add_player(world = %{players: players}, player_id) do
+    new_player = %{id: player_id, position: %{x: 1, y: 1}}
+    new_players = [new_player | players]
+    %{world|players: new_players}
   end
 end
