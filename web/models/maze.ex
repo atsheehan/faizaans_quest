@@ -25,13 +25,21 @@ defmodule Hookah.Maze do
   end
 
   def handle_call({:join, player_id}, _from, world) do
-    new_world = add_player(world, player_id)
+    new_world = if !player_exists?(world, player_id) do
+      add_player(world, player_id)
+    else
+      world
+    end
+
     {:reply, new_world, new_world}
   end
 
-
   def handle_call(:get_world, _from, world) do
     {:reply, world, world}
+  end
+
+  defp player_exists?(world, player) do
+    !!find_player(world, player)
   end
 
   defp initial_world do
