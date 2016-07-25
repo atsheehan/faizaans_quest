@@ -7,6 +7,13 @@ defmodule Hookah.MazeChannel do
     {:ok, initial_world, socket}
   end
 
+  def terminate(reason, socket) do
+    Hookah.Maze.leave(socket.assigns.user_id)
+    world = Hookah.Maze.get_world
+    broadcast!(socket, "update", world)
+    :ok
+  end
+
   def handle_info(:sync_world, socket) do
     world = Hookah.Maze.get_world
     broadcast!(socket, "update", world)

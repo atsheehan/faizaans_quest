@@ -7,6 +7,10 @@ defmodule Hookah.Maze do
     GenServer.call(pid, {:join, player_id})
   end
 
+  def leave(pid \\ Hookah.Maze, player_id) do
+    GenServer.cast(pid, {:leave, player_id})
+  end
+
   def move(pid \\ Hookah.Maze, player_id, direction) do
     GenServer.call(pid, {:move, player_id, direction})
   end
@@ -36,6 +40,16 @@ defmodule Hookah.Maze do
 
   def handle_call(:get_world, _from, world) do
     {:reply, world, world}
+  end
+
+  def handle_cast({:leave, player_id}, world) do
+    new_world = if player_exists?(world, player_id) do
+      remove_player(world, player_id)
+    else
+      world
+    end
+
+    {:noreply, new_world}
   end
 
   defp player_exists?(world, player) do
@@ -97,6 +111,11 @@ defmodule Hookah.Maze do
   defp add_player(world = %{players: players}, player_id) do
     new_player = %{id: player_id, position: %{x: 1, y: 1}}
     new_players = [new_player | players]
+    %{world|players: new_players}
+  end
+
+  defp remove_player(world = %{players: players}, player_id) do
+    new_players = Enum.reject(players, fn player -> player.id == player_id end)
     %{world|players: new_players}
   end
 end
