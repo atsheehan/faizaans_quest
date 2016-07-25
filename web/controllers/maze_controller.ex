@@ -5,6 +5,15 @@ defmodule Hookah.MazeController do
   plug :authenticate
 
   def index(conn, _params) do
-    render(conn, "index.html")
+    conn
+    |> assign(:user_token, user_token(conn))
+    |> render("index.html")
+  end
+
+  defp user_token(conn) do
+    case get_session(conn, :provider_id) do
+      nil -> nil
+      id -> Phoenix.Token.sign(conn, "user socket", id)
+    end
   end
 end
