@@ -1,6 +1,9 @@
 defmodule Hookah.SessionController do
   use Hookah.Web, :controller
 
+  import Hookah.Auth, only: [authenticate: 2]
+  plug :authenticate when action in [:sign_out]
+
   @oauth_login_url "https://github.com/login/oauth/authorize"
   @oauth_access_url "https://github.com/login/oauth/access_token"
   @user_details_url "https://api.github.com/user"
