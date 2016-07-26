@@ -57,17 +57,38 @@ defmodule Hookah.Maze do
   end
 
   defp initial_world do
-    %{
-      rows: 4,
-      columns: 4,
-      grid: [
-        1, 1, 1, 1,
-        1, 0, 0, 1,
-        1, 0, 0, 1,
-        1, 1, 1, 1
-      ],
-      players: []
-    };
+    generate(10, 10)
+    |> Map.put(:players, [])
+  end
+
+  defp generate(rows, columns) do
+    width = 2 * columns + 1
+    height = 2 * rows + 1
+
+    cells = for row <- (0..rows - 1), col <- (0..columns - 1), do: {2 * row + 1, 2 * col + 1}
+
+    open_cells = Enum.reduce(cells, MapSet.new, fn {row, col}, open_cells ->
+      neighboring_cells = [{row + 2, col}, {row, col + 2}]
+      |> Enum.reject(fn {row, col} -> row >= height || col >= width end)
+
+      if !Enum.empty?(neighboring_cells) do
+        target_cell = Enum.random(neighboring_cells)
+        {target_row, target_col} = target_cell
+
+        cells_to_open = for r <- (row..target_row), c <- (col..target_col), do: {r, c}
+
+        Enum.reduce(cells_to_open, open_cells, fn cell, open_cells ->
+          MapSet.put(open_cells, cell)
+        end)
+      else
+        open_cells
+      end
+    end)
+
+    coords = for row <- (0..height - 1), col <- (0..height - 1), do: {row, col}
+    grid = Enum.map(coords, fn cell -> if MapSet.member?(open_cells, cell), do: 0, else: 1 end)
+
+    %{rows: height, columns: width, grid: grid}
   end
 
   defp do_move(world, player_id, direction) do
