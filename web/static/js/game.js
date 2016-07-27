@@ -102,11 +102,12 @@ let Game = {
     let ctx = renderer.context;
     ctx.clearRect(0, 0, renderer.width, renderer.height);
 
-    // let playerX = world.player.x * CELL_WIDTH;
-    // let playerY = world.player.y * CELL_WIDTH;
+    let player = this.findPlayer(world.players, world.player_id);
+    let playerX = player.position.x * CELL_WIDTH;
+    let playerY = player.position.y * CELL_WIDTH;
 
-    let xOffset = 0; //(renderer.width / 2) - playerX;
-    let yOffset = 0; // (renderer.height / 2) - playerY;
+    let xOffset = (renderer.width / 2) - playerX;
+    let yOffset = (renderer.height / 2) - playerY;
 
     for (let row = 0; row < world.rows; row++) {
       for (let col = 0; col < world.columns; col++) {
@@ -130,6 +131,10 @@ let Game = {
 
       ctx.fillRect(x + xOffset, y + yOffset, CELL_WIDTH, CELL_WIDTH);
     }
+  },
+
+  findPlayer(players, playerId) {
+    return players.find(player => {return player.id == playerId; });
   }
 };
 
