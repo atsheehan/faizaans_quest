@@ -100,7 +100,8 @@ let Game = {
     const CELL_WIDTH = 24;
 
     let ctx = renderer.context;
-    ctx.clearRect(0, 0, renderer.width, renderer.height);
+    ctx.fillStyle = "black";
+    ctx.fillRect(0, 0, renderer.width, renderer.height);
 
     let player = this.findPlayer(world.players, world.player_id);
     let playerX = player.position.x * CELL_WIDTH;
