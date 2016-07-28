@@ -1,6 +1,6 @@
 let Game = {
-  init(canvas, socket) {
-    if (!canvas) { return; }
+  init(screen, socket) {
+    if (!screen.canvas || !screen.playerList) { return; }
 
     this.events = [];
     this.messages = [];
@@ -12,12 +12,12 @@ let Game = {
     this.channel.on("update", world => this.messages.push(world));
     this.channel.join()
       .receive("error", resp => console.log("Unable to connect to server", resp))
-      .receive("ok", world => module.setup(world, canvas));
+      .receive("ok", world => module.setup(world, screen));
   },
 
-  setup(world, canvas) {
+  setup(world, screen) {
     window.addEventListener("keydown", e => this.addEvent(e));
-    let renderer = this.prepareRenderer(canvas);
+    let renderer = this.prepareRenderer(screen);
     window.requestAnimationFrame(time => this.loop(world, renderer, time));
   },
 
@@ -26,13 +26,18 @@ let Game = {
       this.handleMessages(
         this.handleEvents(world, time), time), time);
 
-    this.render(newWorld, renderer);
+    this.render(world, newWorld, renderer);
     window.requestAnimationFrame(time => this.loop(newWorld, renderer, time));
   },
 
-  prepareRenderer(canvas) {
-    let ctx = canvas.getContext("2d");
-    return { context: ctx, width: canvas.width, height: canvas.height };
+  prepareRenderer(screen) {
+    let ctx = screen.canvas.getContext("2d");
+    return {
+      context: ctx,
+      width: screen.canvas.width,
+      height: screen.canvas.height,
+      playerList: screen.playerList
+    };
   },
 
   addEvent(event) {
@@ -96,7 +101,7 @@ let Game = {
     return world;
   },
 
-  render(world, renderer) {
+  render(oldWorld, world, renderer) {
     const CELL_WIDTH = 24;
 
     let ctx = renderer.context;
@@ -132,6 +137,39 @@ let Game = {
 
       ctx.fillRect(x + xOffset, y + yOffset, CELL_WIDTH, CELL_WIDTH);
     }
+
+    this.renderPlayerList(oldWorld.players, world.players, renderer.playerList);
+  },
+
+  renderPlayerList(oldPlayers, newPlayers, playerList) {
+    let oldNames = oldPlayers.map(player => player.username);
+    let newNames = newPlayers.map(player => player.username);
+
+    if (!playerList.hasChildNodes() || !this.arraysEqual(oldNames, newNames)) {
+      while (playerList.firstChild) {
+        playerList.removeChild(playerList.firstChild);
+      }
+
+      newNames.forEach(username => {
+        let li = document.createElement("li");
+        li.appendChild(document.createTextNode(username));
+        playerList.appendChild(li);
+      });
+    }
+  },
+
+  arraysEqual(a, b) {
+    if (a.length != b.length) {
+      return false;
+    }
+
+    for (let i = 0; i < a.length; i++) {
+      if (a[i] != b[i]) {
+        return false;
+      }
+    }
+
+    return true;
   },
 
   findPlayer(players, playerId) {

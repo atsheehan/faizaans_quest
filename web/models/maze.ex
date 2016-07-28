@@ -3,8 +3,8 @@ defmodule Hookah.Maze do
 
   def get_world(pid \\ Hookah.Maze), do: GenServer.call(pid, :get_world)
 
-  def join(pid \\ Hookah.Maze, player_id) do
-    GenServer.call(pid, {:join, player_id})
+  def join(pid \\ Hookah.Maze, player = %{id: _, username: _}) do
+    GenServer.call(pid, {:join, player})
   end
 
   def leave(pid \\ Hookah.Maze, player_id) do
@@ -28,9 +28,9 @@ defmodule Hookah.Maze do
     {:reply, new_world, new_world}
   end
 
-  def handle_call({:join, player_id}, _from, world) do
+  def handle_call({:join, player = %{id: player_id, username: _}}, _from, world) do
     new_world = if !player_exists?(world, player_id) do
-      add_player(world, player_id)
+      add_player(world, player)
     else
       world
     end
@@ -129,8 +129,8 @@ defmodule Hookah.Maze do
     (y * columns) + x
   end
 
-  defp add_player(world = %{players: players}, player_id) do
-    new_player = %{id: player_id, position: %{x: 1, y: 1}}
+  defp add_player(world = %{players: players}, %{id: player_id, username: username}) do
+    new_player = %{id: player_id, username: username, position: %{x: 1, y: 1}}
     new_players = [new_player | players]
     %{world|players: new_players}
   end

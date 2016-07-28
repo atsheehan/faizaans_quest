@@ -23,8 +23,8 @@ defmodule Hookah.UserSocket do
   # performing token verification on connect.
   def connect(%{"token" => token}, socket) do
     case Phoenix.Token.verify(socket, "user socket", token, max_age: @max_age) do
-      {:ok, user_id} ->
-        {:ok, assign(socket, :user_id, user_id)}
+      {:ok, %{user_id: id, username: username}} ->
+        {:ok, assign(socket, :user, %{id: id, username: username})}
       {:error, _reason} ->
         :error
     end
@@ -42,5 +42,5 @@ defmodule Hookah.UserSocket do
   #     Hookah.Endpoint.broadcast("users_socket:#{user.id}", "disconnect", %{})
   #
   # Returning `nil` makes this socket anonymous.
-  def id(socket), do: "users_socket:#{socket.assigns.user_id}"
+  def id(socket), do: "users_socket:#{socket.assigns.user.id}"
 end

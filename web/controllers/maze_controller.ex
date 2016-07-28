@@ -11,9 +11,11 @@ defmodule Hookah.MazeController do
   end
 
   defp user_token(conn) do
-    case get_session(conn, :provider_id) do
-      nil -> nil
-      id -> Phoenix.Token.sign(conn, "user socket", id)
+    case {get_session(conn, :provider_id), get_session(conn, :username)} do
+      {nil, _} -> nil
+      {_, nil} -> nil
+      {id, username} ->
+        Phoenix.Token.sign(conn, "user socket", %{user_id: id, username: username})
     end
   end
 end

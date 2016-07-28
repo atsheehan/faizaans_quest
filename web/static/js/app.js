@@ -21,5 +21,9 @@ import "phoenix_html";
 import socket from "./socket";
 import Game from "./game";
 
-let canvas = document.getElementById("maze-canvas");
-Game.init(canvas, socket);
+let screen = {
+  canvas: document.getElementById("maze-canvas"),
+  playerList: document.getElementById("player-list")
+};
+
+Game.init(screen, socket);
