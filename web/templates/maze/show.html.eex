@@ -1,0 +1,7 @@
+<script>window.mazeId = "<%= @maze_id %>"</script>
+
+<canvas id="maze-canvas" width="500" height="500">
+  Can't render the maze.
+</canvas>
+
+<ul id="player-list"></ul>

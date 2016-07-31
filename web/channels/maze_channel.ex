@@ -1,23 +1,32 @@
 defmodule Hookah.MazeChannel do
   use Hookah.Web, :channel
 
-  def join("maze", _params, socket) do
-    :timer.send_interval(5_000, :sync_world)
-    initial_world =
-      Hookah.Maze.join(socket.assigns.user)
-      |> add_player_id(socket)
-    {:ok, initial_world, socket}
+  def join("mazes:" <> maze_id, _params, socket) do
+    case Hookah.MazeRegistry.lookup(maze_id) do
+      {:ok, pid} ->
+        socket = assign(socket, :maze_pid, pid)
+        initial_world =
+          Hookah.Maze.join(pid, socket.assigns.user)
+          |> add_player_id(socket)
+
+        :timer.send_interval(5_000, :sync_world)
+        {:ok, initial_world, socket}
+      :error ->
+        {:error, %{reason: "Cannot find maze with ID: #{maze_id}"}}
+    end
   end
 
   def terminate(_reason, socket) do
-    Hookah.Maze.leave(socket.assigns.user.id)
-    world = Hookah.Maze.get_world
+    maze_pid = socket.assigns.maze_pid
+
+    Hookah.Maze.leave(maze_pid, socket.assigns.user.id)
+    world = Hookah.Maze.get_world(maze_pid)
     broadcast!(socket, "update", world)
     :ok
   end
 
   def handle_info(:sync_world, socket) do
-    world = Hookah.Maze.get_world
+    world = Hookah.Maze.get_world(socket.assigns.maze_pid)
     broadcast!(socket, "update", world)
     {:noreply, socket}
   end
@@ -36,7 +45,9 @@ defmodule Hookah.MazeChannel do
 
   defp move(direction, _params, socket) do
     player_id = socket.assigns.user.id
-    world = Hookah.Maze.move(player_id, direction)
+    maze_pid = socket.assigns.maze_pid
+
+    world = Hookah.Maze.move(maze_pid, player_id, direction)
     broadcast!(socket, "update", world)
     {:noreply, socket}
   end

@@ -26,4 +26,4 @@ let screen = {
   playerList: document.getElementById("player-list")
 };
 
-Game.init(screen, socket);
+Game.init(screen, socket, window.mazeId);

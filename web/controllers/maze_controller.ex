@@ -5,9 +5,12 @@ defmodule Hookah.MazeController do
   plug :authenticate
 
   def index(conn, _params) do
-    conn
-    |> assign(:user_token, user_token(conn))
-    |> render("index.html")
+    mazes = Hookah.MazeRegistry.list_mazes
+    render(conn, "index.html", mazes: mazes)
+  end
+
+  def show(conn, %{"id" => id}) do
+    render(conn, "show.html", user_token: user_token(conn), maze_id: id)
   end
 
   defp user_token(conn) do

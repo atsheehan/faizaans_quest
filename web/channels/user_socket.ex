@@ -4,7 +4,7 @@ defmodule Hookah.UserSocket do
   @max_age 2 * 7 * 24 * 60 * 60
 
   ## Channels
-  channel "maze", Hookah.MazeChannel
+  channel "mazes:*", Hookah.MazeChannel
 
   ## Transports
   transport :websocket, Phoenix.Transports.WebSocket, timeout: 45_000

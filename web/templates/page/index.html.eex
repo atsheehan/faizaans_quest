@@ -1,1 +1,1 @@
-<%= link("Enter the Maze...", to: "/maze") %>
+<%= link("Enter the Maze...", to: maze_path(@conn, :index)) %>

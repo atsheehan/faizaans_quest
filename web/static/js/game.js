@@ -1,12 +1,12 @@
 let Game = {
-  init(screen, socket) {
+  init(screen, socket, mazeId) {
     if (!screen.canvas || !screen.playerList) { return; }
 
     this.events = [];
     this.messages = [];
 
     socket.connect();
-    this.channel = socket.channel("maze", {});
+    this.channel = socket.channel(`mazes:${mazeId}`, {});
     let module = this;
 
     this.channel.on("update", world => this.messages.push(world));

@@ -17,7 +17,9 @@ defmodule Hookah.Router do
     pipe_through :browser # Use the default browser stack
 
     get "/", PageController, :index
-    get "/maze", MazeController, :index
+
+    resources "/mazes", MazeController, only: [:index, :show]
+
     get "/auth/sign_in", SessionController, :sign_in
     get "/auth/sign_out", SessionController, :sign_out
     get "/auth/github/callback", SessionController, :callback

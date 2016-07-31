@@ -1,17 +1,17 @@
 defmodule Hookah.Maze do
   use GenServer
 
-  def get_world(pid \\ Hookah.Maze), do: GenServer.call(pid, :get_world)
+  def get_world(pid), do: GenServer.call(pid, :get_world)
 
-  def join(pid \\ Hookah.Maze, player = %{id: _, username: _}) do
+  def join(pid, player = %{id: _, username: _}) do
     GenServer.call(pid, {:join, player})
   end
 
-  def leave(pid \\ Hookah.Maze, player_id) do
+  def leave(pid, player_id) do
     GenServer.cast(pid, {:leave, player_id})
   end
 
-  def move(pid \\ Hookah.Maze, player_id, direction) do
+  def move(pid, player_id, direction) do
     GenServer.call(pid, {:move, player_id, direction})
   end
 

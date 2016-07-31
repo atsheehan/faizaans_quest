@@ -1,5 +1,7 @@
-<canvas id="maze-canvas" width="500" height="500">
-  Can't render the maze.
-</canvas>
+<h1>Choose a Maze</h1>
 
-<ul id="player-list"></ul>
+<ul class="maze-list">
+  <%= for maze_id <- @mazes do %>
+    <li><%= link(maze_id, to: maze_path(@conn, :show, maze_id)) %></li>
+  <% end %>
+</ul>
