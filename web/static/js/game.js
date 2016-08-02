@@ -115,18 +115,20 @@ let Game = {
     let xOffset = (renderer.width / 2) - playerX;
     let yOffset = (renderer.height / 2) - playerY;
 
-    for (let row = 0; row < world.rows; row++) {
-      for (let col = 0; col < world.columns; col++) {
-        let index = row * world.columns + col;
-        let cell = world.grid[index];
+    let cells = world.cells;
+    let cellCount = cells.length;
 
-        let color = cell == 1 ? "gray" : "green";
-        let x = col * CELL_WIDTH;
-        let y = row * CELL_WIDTH;
+    for (let i = 0; i < cellCount; i += 3) {
+      let row = cells[i];
+      let col = cells[i + 1];
+      let cell = cells[i + 2];
 
-        ctx.fillStyle = color;
-        ctx.fillRect(x + xOffset, y + yOffset, CELL_WIDTH, CELL_WIDTH);
-      }
+      let color = cell == 1 ? "gray" : "green";
+      let x = col * CELL_WIDTH;
+      let y = row * CELL_WIDTH;
+
+      ctx.fillStyle = color;
+      ctx.fillRect(x + xOffset, y + yOffset, CELL_WIDTH, CELL_WIDTH);
     }
 
     ctx.fillStyle = "red";

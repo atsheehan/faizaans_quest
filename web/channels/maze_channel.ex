@@ -10,7 +10,7 @@ defmodule Hookah.MazeChannel do
           |> add_player_id(socket)
 
         :timer.send_interval(5_000, :sync_world)
-        {:ok, initial_world, socket}
+        {:ok, convert_cells(initial_world), socket}
       :error ->
         {:error, %{reason: "Cannot find maze with ID: #{maze_id}"}}
     end
@@ -34,7 +34,7 @@ defmodule Hookah.MazeChannel do
   intercept ["update"]
 
   def handle_out("update", world, socket) do
-    push socket, "update", add_player_id(world, socket)
+    push socket, "update", add_player_id(convert_cells(world), socket)
     {:noreply, socket}
   end
 
@@ -54,5 +54,10 @@ defmodule Hookah.MazeChannel do
 
   defp add_player_id(world, socket) do
     Map.put(world, :player_id, socket.assigns.user.id)
+  end
+
+  defp convert_cells(world) do
+    cells = Enum.flat_map(world.cells, fn {{row, col}, cell} -> [row, col, cell] end)
+    Map.put(world, :cells, cells)
   end
 end

@@ -57,7 +57,7 @@ defmodule Hookah.Maze do
   end
 
   defp initial_world do
-    generate(100, 100)
+    generate(20, 20)
     |> Map.put(:players, [])
   end
 
@@ -85,10 +85,12 @@ defmodule Hookah.Maze do
       end
     end)
 
-    coords = for row <- (0..height - 1), col <- (0..width - 1), do: {row, col}
-    grid = Enum.map(coords, fn cell -> if MapSet.member?(open_cells, cell), do: 0, else: 1 end)
+    cells = for row <- (0..height - 1),
+      col <- (0..width - 1),
+      into: %{},
+      do: {{row, col}, (if MapSet.member?(open_cells, {row, col}), do: 0, else: 1)}
 
-    %{rows: height, columns: width, grid: grid}
+    %{cells: cells}
   end
 
   defp do_move(world, player_id, direction) do
@@ -121,12 +123,8 @@ defmodule Hookah.Maze do
     %{world|players: updated_players}
   end
 
-  defp passable?(world = %{grid: grid}, position) do
-    Enum.at(grid, index(world, position)) == 0
-  end
-
-  defp index(%{columns: columns}, %{x: x, y: y}) do
-    (y * columns) + x
+  defp passable?(world = %{cells: cells}, pos = %{x: x, y: y}) do
+    cells[{y, x}] == 0
   end
 
   defp add_player(world = %{players: players}, %{id: player_id, username: username}) do
