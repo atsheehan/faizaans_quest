@@ -57,7 +57,7 @@ defmodule Hookah.Maze do
   end
 
   defp initial_world do
-    generate(10, 10)
+    generate(100, 100)
     |> Map.put(:players, [])
   end
 
@@ -85,7 +85,7 @@ defmodule Hookah.Maze do
       end
     end)
 
-    coords = for row <- (0..height - 1), col <- (0..height - 1), do: {row, col}
+    coords = for row <- (0..height - 1), col <- (0..width - 1), do: {row, col}
     grid = Enum.map(coords, fn cell -> if MapSet.member?(open_cells, cell), do: 0, else: 1 end)
 
     %{rows: height, columns: width, grid: grid}
