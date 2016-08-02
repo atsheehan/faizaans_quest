@@ -1,7 +1,9 @@
 defmodule Hookah.Maze do
   use GenServer
 
-  def get_world(pid), do: GenServer.call(pid, :get_world)
+  def get_world(pid, player_id) do
+    GenServer.call(pid, {:get_world, player_id})
+  end
 
   def join(pid, player = %{id: _, username: _}) do
     GenServer.call(pid, {:join, player})
@@ -25,7 +27,7 @@ defmodule Hookah.Maze do
 
   def handle_call({:move, player_id, direction}, _from, world) do
     new_world = do_move(world, player_id, direction)
-    {:reply, new_world, new_world}
+    {:reply, viewable_by(player_id, new_world), new_world}
   end
 
   def handle_call({:join, player = %{id: player_id, username: _}}, _from, world) do
@@ -35,11 +37,11 @@ defmodule Hookah.Maze do
       world
     end
 
-    {:reply, new_world, new_world}
+    {:reply, viewable_by(player_id, new_world), new_world}
   end
 
-  def handle_call(:get_world, _from, world) do
-    {:reply, world, world}
+  def handle_call({:get_world, player_id}, _from, world) do
+    {:reply, viewable_by(player_id, world), world}
   end
 
   def handle_cast({:leave, player_id}, world) do
@@ -54,6 +56,18 @@ defmodule Hookah.Maze do
 
   defp player_exists?(world, player) do
     !!find_player(world, player)
+  end
+
+  defp viewable_by(player_id, world = %{cells: cells}) do
+    %{position: %{x: player_col, y: player_row}} = find_player(world, player_id)
+
+    range = 5
+
+    visible_cells = for row <- (player_row - range)..(player_row + range),
+      col <- (player_col - range)..(player_col + range),
+      do: {row, col}
+
+    %{world | cells: Map.take(cells, visible_cells)}
   end
 
   defp initial_world do

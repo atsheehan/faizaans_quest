@@ -20,13 +20,13 @@ defmodule Hookah.MazeChannel do
     maze_pid = socket.assigns.maze_pid
 
     Hookah.Maze.leave(maze_pid, socket.assigns.user.id)
-    world = Hookah.Maze.get_world(maze_pid)
+    world = Hookah.Maze.get_world(maze_pid, socket.assigns.user.id)
     broadcast!(socket, "update", world)
     :ok
   end
 
   def handle_info(:sync_world, socket) do
-    world = Hookah.Maze.get_world(socket.assigns.maze_pid)
+    world = Hookah.Maze.get_world(socket.assigns.maze_pid, socket.assigns.user.id)
     broadcast!(socket, "update", world)
     {:noreply, socket}
   end
