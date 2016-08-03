@@ -12,7 +12,6 @@ defmodule Hookah.MazeChannel do
           Maze.join(pid, socket.assigns.user)
           |> add_player_id(socket)
 
-        :timer.send_interval(5_000, :sync_world)
         {:ok, convert_cells(world), socket}
       :error ->
         {:error, %{reason: "Cannot find maze with ID: #{maze_id}"}}
@@ -26,12 +25,6 @@ defmodule Hookah.MazeChannel do
     world = Maze.get_world(maze_pid, socket.assigns.user.id)
     broadcast!(socket, "update", world)
     :ok
-  end
-
-  def handle_info(:sync_world, socket) do
-    world = Maze.get_world(socket.assigns.maze_pid, socket.assigns.user.id)
-    broadcast!(socket, "update", world)
-    {:noreply, socket}
   end
 
   intercept ["update"]
