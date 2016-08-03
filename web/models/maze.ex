@@ -18,11 +18,15 @@ defmodule Hookah.Maze do
   end
 
   def start_link(name \\ nil) do
-    GenServer.start_link(__MODULE__, initial_world, name: name)
+    GenServer.start_link(__MODULE__, :ok, name: name)
   end
 
-  def init(initial_world) do
-    {:ok, initial_world}
+  def init(:ok) do
+    world =
+      generate_maze(20, 20)
+      |> Map.put(:players, [])
+
+    {:ok, world}
   end
 
   def handle_call({:move, player_id, direction}, _from, world) do
@@ -70,12 +74,7 @@ defmodule Hookah.Maze do
     %{world | cells: Map.take(cells, visible_cells)}
   end
 
-  defp initial_world do
-    generate(20, 20)
-    |> Map.put(:players, [])
-  end
-
-  defp generate(rows, columns) do
+  defp generate_maze(rows, columns) do
     width = 2 * columns + 1
     height = 2 * rows + 1
 
