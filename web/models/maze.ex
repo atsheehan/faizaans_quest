@@ -24,7 +24,7 @@ defmodule Hookah.Maze do
   def init(:ok) do
     world =
       generate_maze(20, 20)
-      |> Map.put(:players, [])
+      |> Map.put(:players, %{})
 
     {:ok, world}
   end
@@ -58,8 +58,8 @@ defmodule Hookah.Maze do
     {:noreply, new_world}
   end
 
-  defp player_exists?(world, player) do
-    !!find_player(world, player)
+  defp player_exists?(%{players: players}, player_id) do
+    Map.has_key?(players, player_id)
   end
 
   defp viewable_by(player_id, world = %{cells: cells}) do
@@ -118,7 +118,7 @@ defmodule Hookah.Maze do
   end
 
   defp find_player(%{players: players}, player_id) do
-    Enum.find(players, fn player -> player.id == player_id end)
+    players[player_id]
   end
 
   defp shift_position(position, direction) do
@@ -131,8 +131,7 @@ defmodule Hookah.Maze do
   end
 
   defp update_player(world = %{players: players}, new_player = %{id: player_id}) do
-    index = Enum.find_index(players, fn player -> player.id == player_id end)
-    updated_players = List.replace_at(players, index, new_player)
+    updated_players = %{players | player_id => new_player}
     %{world|players: updated_players}
   end
 
@@ -142,12 +141,11 @@ defmodule Hookah.Maze do
 
   defp add_player(world = %{players: players}, %{id: player_id, username: username}) do
     new_player = %{id: player_id, username: username, position: %{x: 1, y: 1}}
-    new_players = [new_player | players]
-    %{world|players: new_players}
+    updated_players = Map.put(players, player_id, new_player)
+    %{world | players: updated_players}
   end
 
   defp remove_player(world = %{players: players}, player_id) do
-    new_players = Enum.reject(players, fn player -> player.id == player_id end)
-    %{world|players: new_players}
+    %{world | players: Map.delete(players, player_id)}
   end
 end

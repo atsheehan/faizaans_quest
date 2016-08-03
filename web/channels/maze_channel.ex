@@ -12,25 +12,21 @@ defmodule Hookah.MazeChannel do
           Maze.join(pid, socket.assigns.user)
           |> add_player_id(socket)
 
-        {:ok, convert_cells(world), socket}
+        {:ok, serialize(world), socket}
       :error ->
         {:error, %{reason: "Cannot find maze with ID: #{maze_id}"}}
     end
   end
 
   def terminate(_reason, socket) do
-    maze_pid = socket.assigns.maze_pid
-
-    Maze.leave(maze_pid, socket.assigns.user.id)
-    world = Maze.get_world(maze_pid, socket.assigns.user.id)
-    broadcast!(socket, "update", world)
+    Maze.leave(socket.assigns.maze_pid, socket.assigns.user.id)
     :ok
   end
 
   intercept ["update"]
 
   def handle_out("update", world, socket) do
-    push socket, "update", add_player_id(convert_cells(world), socket)
+    push socket, "update", add_player_id(serialize(world), socket)
     {:noreply, socket}
   end
 
@@ -52,8 +48,12 @@ defmodule Hookah.MazeChannel do
     Map.put(world, :player_id, socket.assigns.user.id)
   end
 
-  defp convert_cells(world) do
+  defp serialize(world) do
     cells = Enum.flat_map(world.cells, fn {{row, col}, cell} -> [row, col, cell] end)
-    Map.put(world, :cells, cells)
+    players = Map.values(world.players)
+
+    world
+    |> Map.put(:cells, cells)
+    |> Map.put(:players, players)
   end
 end
