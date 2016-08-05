@@ -1,3 +1,5 @@
+import Immutable from "immutable";
+
 let Game = {
   init(screen, socket, mazeId) {
     if (!screen.canvas || !screen.playerList) { return; }
@@ -11,7 +13,11 @@ let Game = {
     this.channel.on("update", world => this.events.push(["update_world", world]));
     this.channel.join()
       .receive("error", resp => console.log("Unable to connect to server", resp))
-      .receive("ok", world => module.setup(world, screen));
+      .receive("ok", state => module.setup(module.parseState(state), screen));
+  },
+
+  parseState(fromServer) {
+    return Immutable.fromJS(fromServer);
   },
 
   setup(world, screen) {
@@ -20,11 +26,11 @@ let Game = {
     window.requestAnimationFrame(time => this.loop(world, renderer, time));
   },
 
-  loop(world, renderer, time) {
-    let newWorld = this.tick(this.handleEvents(world, time), time);
+  loop(state, renderer, time) {
+    let newState = this.tick(this.handleEvents(state, time), time);
 
-    this.render(world, newWorld, renderer);
-    window.requestAnimationFrame(time => this.loop(newWorld, renderer, time));
+    this.render(state, newState, renderer);
+    window.requestAnimationFrame(time => this.loop(newState, renderer, time));
   },
 
   prepareRenderer(screen) {
@@ -51,28 +57,28 @@ let Game = {
     }
   },
 
-  handleEvents(world, time) {
+  handleEvents(state, time) {
     let event = this.events.pop();
 
     if (event === undefined) {
-      return world;
+      return state;
     } else {
       let [type, message] = event;
-      return this.handleEvents(this.handleEvent(world, type, message, time));
+      return this.handleEvents(this.handleEvent(state, type, message, time));
     }
   },
 
-  handleEvent(world, type, message, time) {
+  handleEvent(state, type, message, time) {
     switch (type) {
     case "move":
       this.handleMove(message.key);
-      return world;
+      return state;
 
     case "update_world":
-      return message;
+      return this.parseState(message);
 
     default:
-      return world;
+      return state;
     }
   },
 
@@ -96,20 +102,22 @@ let Game = {
     ctx.fillStyle = "black";
     ctx.fillRect(0, 0, renderer.width, renderer.height);
 
-    let player = this.findPlayer(world.players, world.player_id);
-    let playerX = player.position.x * CELL_WIDTH;
-    let playerY = player.position.y * CELL_WIDTH;
+    let player = this.findPlayer(world.get("players"), world.get("player_id"));
+    let position = player.get("position");
+
+    let playerX = position.get("x") * CELL_WIDTH;
+    let playerY = position.get("y") * CELL_WIDTH;
 
     let xOffset = (renderer.width / 2) - playerX;
     let yOffset = (renderer.height / 2) - playerY;
 
-    let cells = world.cells;
-    let cellCount = cells.length;
+    let cells = world.get("cells");
+    let cellCount = cells.count();
 
     for (let i = 0; i < cellCount; i += 3) {
-      let row = cells[i];
-      let col = cells[i + 1];
-      let cell = cells[i + 2];
+      let row = cells.get(i);
+      let col = cells.get(i + 1);
+      let cell = cells.get(i + 2);
 
       let color = cell == 1 ? "gray" : "green";
       let x = col * CELL_WIDTH;
@@ -121,19 +129,21 @@ let Game = {
 
     ctx.fillStyle = "red";
 
-    for (let player of world.players) {
-      let x = player.position.x * CELL_WIDTH;
-      let y = player.position.y * CELL_WIDTH;
+    for (let player of world.get("players")) {
+      let position = player.get("position");
+
+      let x = position.get("x") * CELL_WIDTH;
+      let y = position.get("y") * CELL_WIDTH;
 
       ctx.fillRect(x + xOffset, y + yOffset, CELL_WIDTH, CELL_WIDTH);
     }
 
-    this.renderPlayerList(oldWorld.players, world.players, renderer.playerList);
+    this.renderPlayerList(oldWorld.get("players"), world.get("players"), renderer.playerList);
   },
 
   renderPlayerList(oldPlayers, newPlayers, playerList) {
-    let oldNames = oldPlayers.map(player => player.username);
-    let newNames = newPlayers.map(player => player.username);
+    let oldNames = oldPlayers.map(player => player.get("username"));
+    let newNames = newPlayers.map(player => player.get("username"));
 
     if (!playerList.hasChildNodes() || !this.arraysEqual(oldNames, newNames)) {
       while (playerList.firstChild) {
@@ -163,7 +173,7 @@ let Game = {
   },
 
   findPlayer(players, playerId) {
-    return players.find(player => {return player.id == playerId; });
+    return players.find(player => player.get("id") == playerId);
   }
 };
 
