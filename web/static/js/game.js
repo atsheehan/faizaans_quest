@@ -3,28 +3,25 @@ let Game = {
     if (!screen.canvas || !screen.playerList) { return; }
 
     this.events = [];
-    this.messages = [];
 
     socket.connect();
     this.channel = socket.channel(`mazes:${mazeId}`, {});
     let module = this;
 
-    this.channel.on("update", world => this.messages.push(world));
+    this.channel.on("update", world => this.events.push(["update_world", world]));
     this.channel.join()
       .receive("error", resp => console.log("Unable to connect to server", resp))
       .receive("ok", world => module.setup(world, screen));
   },
 
   setup(world, screen) {
-    window.addEventListener("keydown", e => this.addEvent(e));
+    window.addEventListener("keydown", e => this.handleKeyDown(e));
     let renderer = this.prepareRenderer(screen);
     window.requestAnimationFrame(time => this.loop(world, renderer, time));
   },
 
   loop(world, renderer, time) {
-    let newWorld = this.tick(
-      this.handleMessages(
-        this.handleEvents(world, time), time), time);
+    let newWorld = this.tick(this.handleEvents(world, time), time);
 
     this.render(world, newWorld, renderer);
     window.requestAnimationFrame(time => this.loop(newWorld, renderer, time));
@@ -40,27 +37,17 @@ let Game = {
     };
   },
 
-  addEvent(event) {
+  handleKeyDown(event) {
     switch (event.key) {
     case "ArrowLeft":
     case "ArrowRight":
     case "ArrowUp":
     case "ArrowDown":
-      this.events.push(event);
+      this.events.push(["move", event]);
       break;
 
     default:
       break;
-    }
-  },
-
-  handleMessages(world, time) {
-    let message = this.messages.pop();
-
-    if (message === undefined) {
-      return world;
-    } else {
-      return message;
     }
   },
 
@@ -70,30 +57,31 @@ let Game = {
     if (event === undefined) {
       return world;
     } else {
-      return this.handleEvents(this.handleEvent(world, event, time));
+      let [type, message] = event;
+      return this.handleEvents(this.handleEvent(world, type, message, time));
     }
   },
 
-  handleEvent(world, event, time) {
-    switch (event.key) {
-    case "ArrowLeft":
-      this.channel.push("move_left");
+  handleEvent(world, type, message, time) {
+    switch (type) {
+    case "move":
+      this.handleMove(message.key);
       return world;
 
-    case "ArrowRight":
-      this.channel.push("move_right");
-      return world;
-
-    case "ArrowUp":
-      this.channel.push("move_up");
-      return world;
-
-    case "ArrowDown":
-      this.channel.push("move_down");
-      return world;
+    case "update_world":
+      return message;
 
     default:
       return world;
+    }
+  },
+
+  handleMove(key) {
+    switch (key) {
+    case "ArrowLeft": this.channel.push("move_left"); break;
+    case "ArrowRight": this.channel.push("move_right"); break;
+    case "ArrowUp": this.channel.push("move_up"); break;
+    case "ArrowDown": this.channel.push("move_down"); break;
     }
   },
 
