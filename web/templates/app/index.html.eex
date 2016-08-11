@@ -1,0 +1,4 @@
+<script>window.userToken = "<%= assigns[:user_token] %>";</script>
+
+<div id="app-root">
+</div>

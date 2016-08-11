@@ -20,6 +20,7 @@ defmodule Hookah.Router do
 
     resources "/mazes", MazeController, only: [:index, :show]
 
+    get "/app/*path", AppController, :index
     get "/auth/sign_in", SessionController, :sign_in
     get "/auth/sign_out", SessionController, :sign_out
     get "/auth/github/callback", SessionController, :callback

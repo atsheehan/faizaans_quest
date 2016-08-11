@@ -4,6 +4,7 @@ defmodule Hookah.UserSocket do
   @max_age 2 * 7 * 24 * 60 * 60
 
   ## Channels
+  channel "lobby", Hookah.LobbyChannel
   channel "mazes:*", Hookah.MazeChannel
 
   ## Transports

@@ -11,19 +11,17 @@
 //
 // If you no longer want to use a dependency, remember
 // to also remove its path from "config.paths.watched".
-import "phoenix_html";
+import 'phoenix_html';
 
 // Import local files
 //
 // Local files can be imported directly using relative
 // paths "./socket" or full ones "web/static/js/socket".
 
-import socket from "./socket";
-import Game from "./game";
+import initialize from './initialize';
 
-let screen = {
-  canvas: document.getElementById("maze-canvas"),
-  playerList: document.getElementById("player-list")
-};
+let element = document.getElementById('app-root');
 
-Game.init(screen, socket, window.mazeId);
+if (element) {
+  initialize(element);
+}
