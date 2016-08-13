@@ -64,14 +64,18 @@ defmodule Hookah.Maze do
 
   @visibility 5
 
-  defp viewable_by(player_id, world = %{cells: cells}) do
+  defp viewable_by(player_id, world = %{cells: cells, players: players}) do
     %{position: %{x: player_col, y: player_row}} = find_player(world, player_id)
 
     visible_cells = for row <- (player_row - @visibility)..(player_row + @visibility),
       col <- (player_col - @visibility)..(player_col + @visibility),
       do: {row, col}
 
-    %{world | cells: Map.take(cells, visible_cells)}
+    visible_players = Enum.filter(players, fn {_, %{position: position}} ->
+      Enum.member?(visible_cells, {position.y, position.x})
+    end)
+
+    %{world | cells: Map.take(cells, visible_cells), players: Map.new(visible_players)}
   end
 
   defp generate_maze(rows, columns) do
