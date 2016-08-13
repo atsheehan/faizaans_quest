@@ -25,8 +25,16 @@ defmodule Hookah.MazeChannel do
 
   intercept ["update"]
 
-  def handle_out("update", world, socket) do
-    push socket, "update", add_player_id(serialize(world), socket)
+  def handle_out("update", player_ids, socket) do
+    player_id = socket.assigns.user.id
+
+    if MapSet.member?(player_ids, player_id) do
+      pid = socket.assigns.maze_pid
+
+      world = Maze.get_world(pid, player_id)
+      push socket, "update", add_player_id(serialize(world), socket)
+    end
+
     {:noreply, socket}
   end
 
@@ -39,8 +47,10 @@ defmodule Hookah.MazeChannel do
     player_id = socket.assigns.user.id
     maze_pid = socket.assigns.maze_pid
 
-    world = Maze.move(maze_pid, player_id, direction)
-    broadcast!(socket, "update", world)
+    {_, affected_players} = Maze.move(maze_pid, player_id, direction)
+    player_ids = for {id, _} <- affected_players, into: MapSet.new, do: id
+
+    broadcast!(socket, "update", player_ids)
     {:noreply, socket}
   end
 

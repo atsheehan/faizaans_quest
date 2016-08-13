@@ -30,8 +30,8 @@ defmodule Hookah.Maze do
   end
 
   def handle_call({:move, player_id, direction}, _from, world) do
-    new_world = do_move(world, player_id, direction)
-    {:reply, viewable_by(player_id, new_world), new_world}
+    {new_world, affected_players} = do_move(world, player_id, direction)
+    {:reply, {viewable_by(player_id, new_world), affected_players}, new_world}
   end
 
   def handle_call({:join, player = %{id: player_id, username: _}}, _from, world) do
@@ -62,13 +62,13 @@ defmodule Hookah.Maze do
     Map.has_key?(players, player_id)
   end
 
+  @visibility 5
+
   defp viewable_by(player_id, world = %{cells: cells}) do
     %{position: %{x: player_col, y: player_row}} = find_player(world, player_id)
 
-    range = 5
-
-    visible_cells = for row <- (player_row - range)..(player_row + range),
-      col <- (player_col - range)..(player_col + range),
+    visible_cells = for row <- (player_row - @visibility)..(player_row + @visibility),
+      col <- (player_col - @visibility)..(player_col + @visibility),
       do: {row, col}
 
     %{world | cells: Map.take(cells, visible_cells)}
@@ -108,13 +108,28 @@ defmodule Hookah.Maze do
 
   defp do_move(world, player_id, direction) do
     player = find_player(world, player_id)
-    new_position = shift_position(player.position, direction)
+
+    original_position = player.position
+    new_position = shift_position(original_position, direction)
 
     if passable?(world, new_position) do
-      update_player(world, %{player|position: new_position})
+      affected_players = find_players_in_range_of(world,
+        [original_position, new_position])
+
+      world = update_player(world, %{player|position: new_position})
+      {world, affected_players}
     else
-      world
+      {world, []}
     end
+  end
+
+  defp find_players_in_range_of(%{players: players}, positions) do
+    Enum.filter(players, fn {_id, %{position: %{y: player_row, x: player_col}}} ->
+      Enum.any?(positions, fn %{y: row, x: col} ->
+        row <= (player_row + @visibility) && row >= (player_row - @visibility) &&
+        col <= (player_col + @visibility) && col >= (player_col - @visibility)
+      end)
+    end)
   end
 
   defp find_player(%{players: players}, player_id) do
@@ -135,7 +150,7 @@ defmodule Hookah.Maze do
     %{world|players: updated_players}
   end
 
-  defp passable?(world = %{cells: cells}, pos = %{x: x, y: y}) do
+  defp passable?(%{cells: cells}, %{x: x, y: y}) do
     cells[{y, x}] == 0
   end
 
