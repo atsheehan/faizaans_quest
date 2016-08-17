@@ -1,6 +1,12 @@
 import React, { Component, PropTypes } from 'react';
+import { Presence } from 'phoenix';
 
 import GameList from './GameList';
+import PlayerList from './PlayerList';
+
+const presenceToUser = (id, { metas: [first, ...rest] }) => {
+  return { id, username: first.username };
+}
 
 class Lobby extends Component {
   componentDidMount() {
@@ -11,6 +17,24 @@ class Lobby extends Component {
     );
 
     this.channel = socket.channel("lobby", {});
+    this.presence = {};
+
+    this.channel.on('presence_state', state => {
+      this.presence = Presence.syncState(this.presence, state);
+      store.dispatch({
+        type: 'RECEIVE_USER_LIST',
+        users: Presence.list(this.presence, presenceToUser)
+      });
+    });
+
+    this.channel.on('presence_diff', diff => {
+      this.presence = Presence.syncDiff(this.presence, diff);
+      store.dispatch({
+        type: 'RECEIVE_USER_LIST',
+        users: Presence.list(this.presence, presenceToUser)
+      });
+    });
+
     this.channel.join().receive("ok", state => {
       store.dispatch({
         type: 'RECEIVE_GAMES',
@@ -31,6 +55,7 @@ class Lobby extends Component {
       <div id="lobby">
         <h1>Choose a Game</h1>
         <GameList games={state.games} />
+        <PlayerList players={state.players} />
       </div>
     );
   }

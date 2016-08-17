@@ -12,6 +12,8 @@ defmodule Hookah do
       supervisor(Hookah.Repo, []),
       # Start the endpoint when the application starts
       supervisor(Hookah.Endpoint, []),
+      # Monitor user presence
+      supervisor(Hookah.Presence, []),
       # Start your own worker by calling: Hookah.Worker.start_link(arg1, arg2, arg3)
       worker(Hookah.MazeRegistry, [Hookah.MazeRegistry])
     ]

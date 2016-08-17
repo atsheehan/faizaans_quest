@@ -9,6 +9,20 @@ const games = (state = [], action) => {
   }
 };
 
+const players = (state = {}, action) => {
+  switch (action.type) {
+  case 'RECEIVE_USER_LIST':
+    const playerMap = {};
+    action.users.forEach((user) => {
+      playerMap[user.id] = user;
+    });
+    return playerMap;
+
+  default:
+    return state;
+  };
+};
+
 const world = (state = {}, action) => {
   switch (action.type) {
   case 'RECEIVE_WORLD':
@@ -20,5 +34,6 @@ const world = (state = {}, action) => {
 
 export default combineReducers({
   games,
+  players,
   world
 });
